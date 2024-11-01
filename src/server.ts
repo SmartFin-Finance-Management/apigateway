@@ -18,10 +18,19 @@ app.use('/api/finances',authenticateJWT, createProxyMiddleware({
     target: 'http://localhost:8000',
     changeOrigin: true
 }));
-app.use('/api/organisations',authenticateJWT, createProxyMiddleware({
+app.use('/api/organisations', (req, res, next) => {
+    // Check if the request is for the specific endpoint that should not be authenticated
+    if (req.method === 'POST' && req.path === '/Org') {
+      // If it's the public endpoint, skip the authentication
+      next();
+    } else {
+      // For all other endpoints, use the authentication middleware
+      authenticateJWT(req, res, next);
+    }
+  }, createProxyMiddleware({
     target: 'http://localhost:5000',
-    changeOrigin: true
-}));
+    changeOrigin: true,
+  }));
 app.use('/api/projects',authenticateJWT, createProxyMiddleware({
     target: 'http://localhost:4000',
     changeOrigin: true

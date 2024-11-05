@@ -3,9 +3,12 @@ import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import dotenv from 'dotenv';
 import { authenticateJWT } from './middleware/authenticate';
+import cors  from 'cors';
+
 
 dotenv.config();
 const app = express();
+app.use(cors());
 
 //Auth Service Proxy
 app.use('/api/auth', createProxyMiddleware({
@@ -14,13 +17,16 @@ app.use('/api/auth', createProxyMiddleware({
 }));
 
 // Finance Service Proxy (protected)
-app.use('/api/finances',authenticateJWT, createProxyMiddleware({
+app.use('/api/finances',authenticateJWT,  createProxyMiddleware({
     target: 'http://localhost:8000',
     changeOrigin: true
 }));
 app.use('/api/organisations', (req, res, next) => {
     // Check if the request is for the specific endpoint that should not be authenticated
-    if (req.method === 'POST' && req.path === '/Org') {
+    if (req.method === 'POST' && req.path === '/Orgp') {
+      // If it's the public endpoint, skip the authentication
+      next();
+    } else if (req.method === 'GET' && req.path === '/Orgp') {
       // If it's the public endpoint, skip the authentication
       next();
     } else {
@@ -40,9 +46,11 @@ app.use('/api/employees',authenticateJWT, createProxyMiddleware({
     changeOrigin: true
 }));
 app.use('/api/clients',authenticateJWT, createProxyMiddleware({
-    target: 'http://localhost:6000',
+    target: 'http://localhost:8008',
     changeOrigin: true
 }));
 app.listen(7000, () => {
     console.log('API Gateway running on port 7000');
 });
+
+

@@ -16,6 +16,7 @@ app.use('/api/auth', createProxyMiddleware({
     changeOrigin: true
 }));
 
+
 // Finance Service Proxy (protected)
 app.use('/api/finances',authenticateJWT,  createProxyMiddleware({
     target: 'http://localhost:8000',

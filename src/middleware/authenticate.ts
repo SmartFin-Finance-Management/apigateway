@@ -7,13 +7,13 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
 
     // Ensure token is defined
     if (!token) {
-         res.status(401).json({ message: 'Access token required' });
-         return;
+        res.status(401).json({ message: 'Access token required' });
+        return;
     }
 
     try {
         // Send token to authentication service for validation
-        const response = await axios.get('http://localhost:9000/api/users/validateToken', {
+        const response = await axios.get('http://localhost:9000/validateToken', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -21,7 +21,7 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
 
         // If validation is successful, attach user info to request
         const user = response.data; // Adjust based on the response structure
-        res.status(200).json({ user }); // Adjust based on the response structure
+        (req as any).user=user // Adjust based on the response structure
         next(); // Proceed to the next middleware or route handler
     } catch (error) {
         res.status(403).json({ message: 'Invalid token' });
